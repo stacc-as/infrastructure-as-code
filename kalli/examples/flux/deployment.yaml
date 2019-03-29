@@ -1,0 +1,90 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flux
+  labels:
+    app: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flux
+  template:
+    metadata:
+      labels:
+        app: flux
+    spec:
+      serviceAccountName: flux
+      volumes:
+      - name: kubedir
+        configMap:
+          name: flux-kube-config
+      - name: git-key
+        secret:
+          secretName: flux-git-deploy
+          defaultMode: 0400
+      - name: git-keygen
+        emptyDir:
+          medium: Memory
+      - name: acr-credentials
+        hostPath:
+          path: "/etc/kubernetes/azure.json"
+          type: ""
+      containers:
+        - name: flux
+          image: "quay.io/weaveworks/flux:1.10.1"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - name: http
+            containerPort: 3030
+            protocol: TCP
+          volumeMounts:
+          - name: kubedir
+            mountPath: /root/.kubectl
+          - name: git-key
+            mountPath: /etc/fluxd/ssh
+            readOnly: true
+          - name: git-keygen
+            mountPath: /var/fluxd/keygen
+          - name: acr-credentials
+            mountPath: /etc/kubernetes/azure.json
+            readOnly: true
+          env:
+          - name: KUBECONFIG
+            value: /root/.kubectl/config
+          args:
+          - --ssh-keygen-dir=/var/fluxd/keygen
+          - --k8s-secret-name=flux-git-deploy
+          - --memcached-hostname=flux-memcached
+          - --memcached-service=
+          # Configure git repository
+          - --git-url=git@github.com:stacc-as/infrastructure-as-code.git
+          # Configure git branch
+          - --git-branch=master
+          # Configure the path for flux to read
+          - --git-path=kalli/examples/deploy/kubernetes
+          # Configure the git user
+          - --git-user=gitops-workshop
+          # Configure the git email
+          - --git-email=support@weave.works
+          - --git-set-author=false
+          - --git-poll-interval=5m
+          - --git-timeout=20s
+          - --sync-interval=5m
+          # Skip CI flag
+          - --git-ci-skip=true
+          # Configure git sync label, must end with '-sync'
+          - --git-label=flux-sync
+          - --registry-poll-interval=5m
+          - --registry-rps=200
+          - --registry-burst=125
+          - --registry-trace=false
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
