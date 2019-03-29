@@ -2,7 +2,7 @@
 
 Presentations and code examples from the [meetup](https://www.meetup.com/Bergen-Azure-Meetup/events/259185002) with [Stacc](https://stacc.com/) and [Microsky](https://microsky.no/)
 
-![logo](https://github.com/stacc-as/intrastructure-as-code/raw/master/kalli/presentation/slides/logos.jpeg)
+![logo](https://github.com/stacc-as/infrastructure-as-code/raw/master/kalli/presentation/slides/logos.jpeg)
 
 ## Welcome presentation by [Audun Meltzer](https://www.linkedin.com/in/audun-meltzer/)
 A presentation about why Stacc Insight wants to deliver their application in the cloud and the callenges of managing one product, 117 microservices, 11 production sites with 99 banks.
